@@ -70,7 +70,6 @@ public class BookingController {
     }
 
     @GetMapping("/date/{date}/floor/{floorId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Prenotazioni per data e piano", description = "Ottiene le prenotazioni per data e piano specifici")
     public ResponseEntity<List<BookingDTO>> getBookingsForDateAndFloor(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,

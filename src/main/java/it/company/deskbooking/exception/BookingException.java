@@ -1,0 +1,7 @@
+package it.company.deskbooking.exception;
+
+public class BookingException extends RuntimeException {
+    public BookingException(String message) {
+        super(message);
+    }
+}

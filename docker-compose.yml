@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: deskbooking-postgres
+    environment:
+      POSTGRES_DB: deskbooking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - deskbooking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deskbooking-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/deskbooking
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    networks:
+      - deskbooking-network
+    restart: unless-stopped
+
+  # pgAdmin (optional - per gestione database via UI)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: deskbooking-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@company.it
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    networks:
+      - deskbooking-network
+    depends_on:
+      - postgres
+
+networks:
+  deskbooking-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,6 +1,7 @@
 package it.company.deskbooking.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -61,10 +62,14 @@ public class User {
     private String avatarUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<LockerAssignment> lockerAssignments = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package it.company.deskbooking.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,14 +48,20 @@ public class Floor {
     private String mapImageUrl;
 
     @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Desk> desks = new ArrayList<>();
 
     @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Locker> lockers = new ArrayList<>();
 
     @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Department> departments = new ArrayList<>();
 

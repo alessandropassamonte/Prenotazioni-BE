@@ -1,6 +1,7 @@
 package it.company.deskbooking.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,10 +32,12 @@ public class Booking {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "desk_id", nullable = false)
     private Desk desk;
 

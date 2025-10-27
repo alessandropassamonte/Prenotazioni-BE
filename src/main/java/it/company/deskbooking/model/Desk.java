@@ -1,6 +1,7 @@
 package it.company.deskbooking.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,10 +34,12 @@ public class Desk {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "floor_id", nullable = false)
+    @ToString.Exclude
     private Floor floor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
+    @ToString.Exclude
     private Department department;
 
     @Enumerated(EnumType.STRING)
@@ -62,6 +65,8 @@ public class Desk {
     private Boolean nearBreakArea = false;
 
     @OneToMany(mappedBy = "desk", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
 

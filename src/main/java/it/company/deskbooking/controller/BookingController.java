@@ -60,6 +60,14 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+    @GetMapping("/user/{userId}/upcomingList")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or @userSecurity.isOwner(#userId)")
+    @Operation(summary = "Prenotazioni future utente", description = "Ottiene le prenotazioni future di un utente")
+    public ResponseEntity<List<BookingDTO>> getUserUpcomingListBookings(@PathVariable Long userId) {
+        List<BookingDTO> bookings = bookingService.getUserUpcomingListBookings(userId);
+        return ResponseEntity.ok(bookings);
+    }
+
     @GetMapping("/date/{date}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Prenotazioni per data", description = "Ottiene tutte le prenotazioni per una data specifica")

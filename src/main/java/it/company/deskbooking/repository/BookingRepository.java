@@ -71,6 +71,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         @Param("date") LocalDate date
     );
 
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.user.id = :userId " +
+            "AND b.status = 'ACTIVE' " +
+            "ORDER BY b.bookingDate ASC")
+    List<Booking> findUpcomingListBookingsByUser(
+            @Param("userId") Long userId
+    );
+
     @Query("SELECT COUNT(b) FROM Booking b " +
            "WHERE b.desk.id = :deskId " +
            "AND b.bookingDate BETWEEN :startDate AND :endDate " +

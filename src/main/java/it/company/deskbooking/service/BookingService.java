@@ -53,6 +53,12 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
+    public List<BookingDTO> getUserUpcomingListBookings(Long userId) {
+        return bookingRepository.findUpcomingListBookingsByUser(userId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<BookingDTO> getBookingsForDate(LocalDate date) {
         return bookingRepository.findActiveBookingsForDate(date).stream()
                 .map(this::convertToDTO)

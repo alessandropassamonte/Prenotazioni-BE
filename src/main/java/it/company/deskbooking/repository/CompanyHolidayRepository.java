@@ -20,8 +20,9 @@ public interface CompanyHolidayRepository extends JpaRepository<CompanyHoliday, 
 
     /**
      * Trova tutte le festività in un range di date
+     * Include solo le festività attive presenti nel range
      */
-    @Query("SELECT h FROM CompanyHoliday h WHERE (h.date BETWEEN :startDate AND :endDate AND h.active = true) OR h.recurring = true ORDER BY h.date")
+    @Query("SELECT h FROM CompanyHoliday h WHERE h.date BETWEEN :startDate AND :endDate AND h.active = true ORDER BY h.date")
     List<CompanyHoliday> findByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     /**
@@ -30,7 +31,7 @@ public interface CompanyHolidayRepository extends JpaRepository<CompanyHoliday, 
     Optional<CompanyHoliday> findByDateAndActiveTrue(LocalDate date);
 
     /**
-     * Trova festività ricorrenti (per applicarle agli anni successivi)
+     * Trova festività ricorrenti attive (per applicarle agli anni successivi)
      */
     List<CompanyHoliday> findByRecurringTrueAndActiveTrue();
 
@@ -46,8 +47,12 @@ public interface CompanyHolidayRepository extends JpaRepository<CompanyHoliday, 
     long countByActiveTrue();
 
     /**
-     * Elimina festività vecchie (più di X anni fa)
+     * Elimina festività vecchie (più di X anni fa) - solo non ricorrenti
      */
     @Query("DELETE FROM CompanyHoliday h WHERE h.date < :beforeDate AND h.recurring = false")
     void deleteOldNonRecurringHolidays(@Param("beforeDate") LocalDate beforeDate);
 }
+
+
+
+

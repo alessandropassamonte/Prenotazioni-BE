@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +28,69 @@ public class CompanyHolidayService {
      */
     public List<CompanyHolidayDTO> getAllHolidays() {
         return holidayRepository.findByActiveTrue().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Ottiene o crea le festività per un anno specifico
+     * Se le festività ricorrenti non esistono per quell'anno, le crea automaticamente
+     */
+    @Transactional
+    public List<CompanyHolidayDTO> getOrCreateHolidaysForYear(int year) {
+        log.info("Ricerca festività per l'anno {} con generazione automatica ricorrenti", year);
+
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+
+        // Recupera le festività esistenti per l'anno
+        List<CompanyHoliday> existingHolidays = holidayRepository.findByDateBetween(startDate, endDate);
+        log.info("Trovate {} festività esistenti per l'anno {}", existingHolidays.size(), year);
+
+        // Recupera tutte le festività ricorrenti
+        List<CompanyHoliday> recurringHolidays = holidayRepository.findByRecurringTrueAndActiveTrue();
+        log.info("Trovate {} festività ricorrenti totali", recurringHolidays.size());
+
+        // Lista delle festività da creare
+        Set<CompanyHoliday> holidaysToCreate = new HashSet<>();
+
+        // Per ogni festività ricorrente, verifica se esiste già per l'anno corrente
+        for (CompanyHoliday recurring : recurringHolidays) {
+            // Crea la data per l'anno richiesto mantenendo giorno e mese della festività ricorrente
+            LocalDate targetDate = LocalDate.of(year, recurring.getDate().getMonth(), recurring.getDate().getDayOfMonth());
+
+            // Verifica se esiste già una festività per questa data
+            Optional<CompanyHoliday> existingHoliday = holidayRepository.findByDateAndActiveTrue(targetDate);
+
+            if (existingHoliday.isEmpty()) {
+                CompanyHoliday newHoliday = CompanyHoliday.builder()
+                        .date(targetDate)
+                        .name(recurring.getName())
+                        .description(recurring.getDescription())
+                        .type(recurring.getType())
+                        .recurring(true)
+                        .active(true)
+                        .build();
+                holidaysToCreate.add(newHoliday);
+            } else {
+                log.debug("Festività '{}' già esistente per la data {}",
+                        existingHoliday.get().getName(), targetDate);
+            }
+
+        }
+
+        // Salva le nuove festività se ce ne sono
+        if (!holidaysToCreate.isEmpty()) {
+            log.info("Creazione di {} nuove festività ricorrenti per l'anno {}", holidaysToCreate.size(), year);
+            List<CompanyHoliday> savedHolidays = holidayRepository.saveAll(holidaysToCreate);
+            existingHolidays.addAll(savedHolidays);
+        } else {
+            log.info("Tutte le festività ricorrenti sono già presenti per l'anno {}", year);
+        }
+
+        // Ordina per data e converte in DTO
+        return existingHolidays.stream()
+                .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -154,3 +217,7 @@ public class CompanyHolidayService {
                 .build();
     }
 }
+
+
+
+

@@ -46,6 +46,15 @@ public class CompanyHolidayController {
         return ResponseEntity.ok(holidays);
     }
 
+    @GetMapping("/year/{year}")
+    @Operation(summary = "Festività per anno",
+            description = "Ottiene le festività per un anno specifico, generando automaticamente quelle ricorrenti se mancanti")
+    public ResponseEntity<List<CompanyHolidayDTO>> getHolidaysByYear(@PathVariable int year) {
+        log.info("Richiesta festività per l'anno: {}", year);
+        List<CompanyHolidayDTO> holidays = holidayService.getOrCreateHolidaysForYear(year);
+        return ResponseEntity.ok(holidays);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Dettagli festività", description = "Ottiene i dettagli di una festività")
@@ -92,3 +101,7 @@ public class CompanyHolidayController {
         return ResponseEntity.noContent().build();
     }
 }
+
+
+
+

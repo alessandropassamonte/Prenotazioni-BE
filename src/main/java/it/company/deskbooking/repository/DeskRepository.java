@@ -95,4 +95,12 @@ public interface DeskRepository extends JpaRepository<Desk, Long> {
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate
     );
+
+    Long countByActiveTrue();
+
+    @Query("SELECT COUNT(d) FROM Desk d " +
+            "WHERE d.floor.id = :floorId " +
+            "AND d.active = true")
+    Long countByFloorIdAndActiveTrue(@Param("floorId") Long floorId);
+
 }

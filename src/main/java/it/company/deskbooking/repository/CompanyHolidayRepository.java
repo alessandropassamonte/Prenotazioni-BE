@@ -41,6 +41,8 @@ public interface CompanyHolidayRepository extends JpaRepository<CompanyHoliday, 
     @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM CompanyHoliday h WHERE h.date = :date AND h.active = true")
     boolean isHoliday(@Param("date") LocalDate date);
 
+    List<CompanyHoliday> findByDateBetweenAndActiveTrue(LocalDate startDate, LocalDate endDate);
+
     /**
      * Conta le festività attive
      */

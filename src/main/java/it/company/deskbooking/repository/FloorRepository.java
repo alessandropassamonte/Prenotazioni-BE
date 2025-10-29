@@ -29,4 +29,5 @@ public interface FloorRepository extends JpaRepository<Floor, Long> {
            "WHERE f.active = true " +
            "ORDER BY f.floorNumber")
     List<Floor> findAllActiveWithDetails();
+
 }

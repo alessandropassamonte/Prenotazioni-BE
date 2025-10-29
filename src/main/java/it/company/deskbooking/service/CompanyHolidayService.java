@@ -79,9 +79,28 @@ public class CompanyHolidayService {
 
         }
 
+        // Gestione Pasquetta (festività mobile, non ricorrente)
+        LocalDate pasquettaDate = calcoloPasquetta(year);
+        Optional<CompanyHoliday> existingPasquetta = holidayRepository.findByDateAndActiveTrue(pasquettaDate);
+
+        if (existingPasquetta.isEmpty()) {
+            log.info("Creazione automatica Pasquetta per l'anno {}: {}", year, pasquettaDate);
+            CompanyHoliday pasquetta = CompanyHoliday.builder()
+                    .date(pasquettaDate)
+                    .name("Lunedì dell'Angelo (Pasquetta)")
+                    .description("Festività mobile calcolata automaticamente")
+                    .type(CompanyHoliday.HolidayType.FESTIVITY)
+                    .recurring(false)
+                    .active(true)
+                    .build();
+            holidaysToCreate.add(pasquetta);
+        } else {
+            log.debug("Pasquetta già esistente per l'anno {}: {}", year, pasquettaDate);
+        }
+
         // Salva le nuove festività se ce ne sono
         if (!holidaysToCreate.isEmpty()) {
-            log.info("Creazione di {} nuove festività ricorrenti per l'anno {}", holidaysToCreate.size(), year);
+            log.info("Creazione di {} nuove festività per l'anno {}", holidaysToCreate.size(), year);
             List<CompanyHoliday> savedHolidays = holidayRepository.saveAll(holidaysToCreate);
             existingHolidays.addAll(savedHolidays);
         } else {
@@ -215,6 +234,29 @@ public class CompanyHolidayService {
                 .createdAt(holiday.getCreatedAt())
                 .updatedAt(holiday.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * Calcola la data della Pasqua per un anno specifico
+     * Utilizza l'algoritmo di Gauss per il calcolo della Pasqua
+     */
+    public static LocalDate calcoloPasqua(int year) {
+        int a = year % 19, b = year / 100, c = year % 100;
+        int d = b / 4, e = b % 4, f = (b + 8) / 25;
+        int g = (b - f + 1) / 3, h = (19 * a + b - d - g + 15) % 30;
+        int i = c / 4, k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+        int m = (a + 11 * h + 22 * l) / 451;
+        int month = (h + l - 7 * m + 114) / 31; // 3=Marzo, 4=Aprile
+        int day = (h + l - 7 * m + 114) % 31 + 1; // 22 Mar – 25 Apr
+        return LocalDate.of(year, month, day);
+    }
+
+    /**
+     * Calcola la data della Pasquetta (Lunedì dell'Angelo) per un anno specifico
+     * La Pasquetta è il giorno successivo alla Pasqua
+     */
+    public static LocalDate calcoloPasquetta(int year) {
+        return calcoloPasqua(year).plusDays(1);
     }
 }
 
